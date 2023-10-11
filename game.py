@@ -31,11 +31,15 @@ class Game:
         self._setup_board()
 
     def _setup_board(self):
+        # for each row creates a column with an object Move
         self._current_moves = [
             [Move(row, col) for col in range(self.board_size)]
             for row in range(self.board_size)
         ]
         self._winning_combos = self._get_winning_combos()
+        
+        #print(self._current_moves)
+        
 
     def _get_winning_combos(self):
         """Return all possible winning combinations, i.e. rows, columns and diagonals."""
@@ -55,19 +59,55 @@ class Game:
         # and that there is no winner yet. Note that non-played cells
         # contain an empty string (i.e. ""). 
         # Use variables no_winner and move_not_played.
-        
-        return no_winner and move_not_played
+    
+        no_winner = not self.has_winner()
 
+        for rowMoves in self._current_moves:
+           
+            currMove = next((_move for _move in rowMoves if (_move.row == row and _move.col == col)),None)
+
+            if(currMove is not None):
+                break;
+        
+        move_not_played = True if currMove.label == '' else False
+        
+        return no_winner and move_not_played 
+
+
+    
     def process_move(self, move):
         """Process the current move and check if it's a win."""
         row, col = move.row, move.col
+        label = move.label
         self._current_moves[row][col] = move
+        
         # TODO: check whether the current move leads to a winning combo.
         # Do not return any values but set variables  self._has_winner 
         # and self.winner_combo in case of winning combo.
         # Hint: you can scan pre-computed winning combos in self._winning_combos
+        tupla = (row,col)
+        isWinningCombo = False
+       
 
+        allPlayerMoves = []
 
+        # get all current player's moves
+        for rows in self._current_moves:
+            currMoveTuples = [(_move.row, _move.col) for _move in rows if _move.label == label]
+            
+            if currMoveTuples:
+                allPlayerMoves.extend(currMoveTuples)
+        
+        for combo in self._winning_combos:
+            combSet = set(combo)
+            isAWinningCombo = combSet == set(allPlayerMoves) or set(combo).issubset(allPlayerMoves)
+           
+            if isAWinningCombo:
+                self._has_winner = True
+                self.winner_combo = combo
+                break
+        
+        
     def has_winner(self):
         """Return True if the game has a winner, and False otherwise."""
         return self._has_winner
@@ -76,11 +116,27 @@ class Game:
         """Return True if the game is tied, and False otherwise."""
         # TODO: check whether a tie was reached.
         # There is no winner and all moves have been tried.
+        allMoves = []
+      
+        for rows in self._current_moves:
+            allMoves.extend([(_move.row, _move.col) for _move in rows if _move.label != ""])
 
+        allMoves = set(allMoves)
+        all_combos = set([item for sublist in self._winning_combos for item in sublist])
+        
+    
+        if allMoves == all_combos:
+            return True
+
+        return False
+
+        
+       
     def toggle_player(self):
         """Return a toggled player."""
         # TODO: switches self.current_player to the other player.
         # Hint: https://docs.python.org/3/library/functions.html#next
+        self.current_player = next(self._players)
        
     def reset_game(self):
         """Reset the game state to play again."""
