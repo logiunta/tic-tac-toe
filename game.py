@@ -55,8 +55,9 @@ class Game:
         # and that there is no winner yet. Note that non-played cells
         # contain an empty string (i.e. ""). 
         # Use variables no_winner and move_not_played.
-        
-        return no_winner and move_not_played
+
+        return self.has_winner() and (Move(row,col) in self._current_moves) 
+        #return no_winner and move_not_played
 
     def process_move(self, move):
         """Process the current move and check if it's a win."""
